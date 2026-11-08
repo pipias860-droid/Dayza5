@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dayza // Chernov Exclusion Zone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main id="game-shell">
+      <div id="scene-root"></div>
+
+      <section class="hud top-left" aria-label="Session information">
+        <div class="brand-mark"><span></span>DAYZA / CHERNOZEM</div>
+        <div class="eyebrow">SURVIVAL PROTOTYPE · LIVE WORLD</div>
+        <button id="profile-open" class="profile-open" type="button">PROFILE <span>P</span></button>
+        <div id="base-status" class="base-status">
+          <span>SHELTER</span>
+          <strong id="base-status-name">NO BASE</strong>
+          <small id="base-status-detail">FIND A HOUSE TO CLAIM</small>
+        </div>
+      </section>
+
+      <section class="hud top-right">
+        <div class="status-row">
+          <div class="status-pill"><span class="status-dot"></span><span id="connection-label">CONNECTING</span></div>
+          <div class="player-count"><span id="player-count">0</span> ONLINE</div>
+        </div>
+        <div class="minimap-panel">
+          <canvas id="minimap" width="220" height="220"></canvas>
+          <div class="minimap-meta"><span>N</span><span id="minimap-region">SURVIVOR CAMP</span><button id="map-open" type="button">M</button></div>
+        </div>
+        <div id="team-indicator" class="team-indicator">NO CLAN</div>
+        <div id="threat-indicator" class="threat-indicator">ZONE CLEAR</div>
+      </section>
+
+      <section class="hud bottom-left">
+        <div class="control-card">
+          <div class="control-title">FIELD CONTROLS</div>
+          <div class="controls-row"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>move</span></div>
+          <div class="controls-row"><kbd>SHIFT</kbd><span>sprint</span></div>
+          <div class="controls-row"><kbd>SPACE</kbd><span>jump</span></div>
+          <div class="controls-row"><kbd>E</kbd><span>loot / harvest / chest</span></div>
+          <div class="controls-row"><kbd>R</kbd><span>reload</span></div>
+          <div class="controls-row"><kbd>B</kbd><span>crafting</span></div>
+          <div class="controls-row"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><span>weapon slots</span></div>
+          <div class="controls-row"><kbd>TAB</kbd><span>inventory</span></div>
+          <div class="controls-row"><kbd>M</kbd><kbd>C</kbd><span>map / clan</span></div>
+          <div class="controls-row"><kbd>V</kbd><span>first person</span></div>
+          <div class="controls-row"><kbd>CLICK</kbd><kbd>RMB</kbd><span>fire / aim</span></div>
+        </div>
+      </section>
+
+      <section class="hud bottom-right">
+        <div id="view-mode" class="view-mode">THIRD PERSON</div>
+        <div id="weapon-name" class="weapon-name">AK-74</div>
+        <div id="movement-state" class="movement-state">IDLE</div>
+        <div class="ammo-panel">
+          <div class="ammo-main"><span id="ammo-mag">30</span><span class="ammo-sep">/</span><span id="ammo-reserve">90</span></div>
+          <div id="ammo-type" class="ammo-type">7.62x39MM</div>
+          <div class="reload-track"><div id="reload-fill"></div></div>
+          <div id="reload-label" class="reload-label">READY</div>
+        </div>
+        <div class="coordinate-label">POSITION</div>
+        <div class="coordinates"><span id="position-x">000.0</span><span id="position-z">000.0</span></div>
+      </section>
+
+      <section class="hud vitals-hud" aria-label="Vitals">
+        <div class="vitals-head"><span>VITALS</span><strong id="health-value">100</strong></div>
+        <div class="health-track"><div id="health-fill"></div></div>
+        <div class="vitals-sub"><span id="health-state">STABLE</span><span id="health-hint">HOLD POSITION</span></div>
+      </section>
+
+      <div id="interaction-prompt" class="interaction-prompt"><kbd>E</kbd><span id="interaction-text">SEARCH</span></div>
+      <div id="loot-feed" class="loot-feed" aria-live="polite"></div>
+
+      <div id="start-screen" class="modal-layer">
+        <div class="start-panel">
+          <div class="panel-kicker">DAYZA SYSTEMS / LIVE SESSION</div>
+          <h1>CHERNO<span>ZEM</span></h1>
+          <p>One thousand square kilometres of abandoned rail, farms, and military ground. Loot it before someone loots you.</p>
+          <button id="enter-button" type="button">ENTER THE ZONE <span>↗</span></button>
+          <div class="panel-footnote">WORLD LOOT · CLAIMABLE SHELTERS · INFECTED HORDE · CRAFTING</div>
+        </div>
+      </div>
+
+      <div id="inventory-overlay" class="inventory-overlay" aria-hidden="true">
+        <div class="inventory-window">
+          <div class="inventory-header">
+            <div>
+              <div class="panel-kicker">SURVIVOR LOADOUT / FIELD PACK</div>
+              <h2>INVENTORY</h2>
+            </div>
+            <button id="inventory-close" class="inventory-close" type="button">CLOSE <span>×</span></button>
+          </div>
+
+          <div class="inventory-content">
+            <aside class="equipment-panel">
+              <div class="inventory-section-title">EQUIPMENT</div>
+              <div class="equipment-slot"><span>PRIMARY</span><strong id="equipped-primary">—</strong><small id="equipped-primary-ammo">NO WEAPON</small></div>
+              <div class="equipment-slot"><span>SECONDARY</span><strong id="equipped-secondary">—</strong><small id="equipped-secondary-ammo">NO WEAPON</small></div>
+              <div class="equipment-slot"><span>BODY</span><strong id="equipped-body">EMPTY</strong><small id="equipped-body-stat">NO ARMOR</small></div>
+              <div class="equipment-slot"><span>HEAD</span><strong id="equipped-head">EMPTY</strong><small>NO HEADGEAR</small></div>
+              <div class="equipment-slot"><span>BACKPACK</span><strong id="equipped-backpack">EMPTY</strong><small id="equipped-backpack-stat">NO STORAGE</small></div>
+              <div class="equipment-stats">
+                <div><span>CAPACITY</span><strong id="inventory-capacity">24 SLOTS</strong></div>
+                <div><span>WEIGHT</span><strong id="inventory-weight">0.0 / 20.0 KG</strong></div>
+              </div>
+            </aside>
+
+            <section class="pack-panel">
+              <div class="inventory-section-title"><span>FIELD PACK</span><span id="inventory-count">0 / 24</span></div>
+              <div id="inventory-slots" class="inventory-grid"></div>
+            </section>
+
+            <aside class="item-info-panel">
+              <div class="inventory-section-title">SELECTED ITEM</div>
+              <div id="selected-item-code" class="selected-item-code">— — —</div>
+              <h3 id="selected-item-name">EMPTY SLOT</h3>
+              <div id="selected-item-type" class="selected-item-type">NO ITEM SELECTED</div>
+              <div id="selected-item-rarity" class="selected-item-rarity">—</div>
+              <p id="selected-item-description">Select an item in your field pack to inspect it.</p>
+              <div class="selected-item-meta"><span>WEIGHT</span><strong id="selected-item-weight">—</strong></div>
+              <div class="selected-item-meta"><span>AMMO</span><strong id="selected-item-ammo">—</strong></div>
+              <div class="inventory-actions">
+                <button id="inventory-action" type="button" disabled>EQUIP</button>
+                <button id="inventory-drop" type="button" disabled>DROP</button>
+              </div>
+            </aside>
+          </div>
+
+          <div class="inventory-footer"><span>CLICK TO SELECT · EQUIP WEAPONS, GEAR, OR USE CONSUMABLES</span><span>TAB / ESC TO CLOSE</span></div>
+        </div>
+      </div>
+
+      <div id="clan-overlay" class="inventory-overlay clan-overlay" aria-hidden="true">
+        <div class="inventory-window clan-window">
+          <div class="inventory-header">
+            <div>
+              <div class="panel-kicker">SURVIVOR NETWORK / TEAM PROTOCOL</div>
+              <h2>CLANS</h2>
+            </div>
+            <button id="clan-close" class="inventory-close" type="button">CLOSE <span>×</span></button>
+          </div>
+          <div class="clan-content">
+            <aside class="clan-self-panel">
+              <div class="inventory-section-title">YOUR CLAN</div>
+              <div id="clan-self" class="clan-self">NO CLAN</div>
+              <div id="clan-roster" class="clan-roster"></div>
+              <div id="clan-actions" class="clan-actions"></div>
+              <div id="clan-invites" class="clan-invites"></div>
+              <div id="clan-create-panel" class="clan-create-panel">
+                <div class="inventory-section-title">FOUND A CLAN</div>
+                <form id="clan-create-form">
+                  <input id="clan-name-input" maxlength="20" placeholder="CLAN NAME" />
+                  <input id="clan-tag-input" maxlength="4" placeholder="TAG" />
+                  <button type="submit">FOUND CLAN</button>
+                </form>
+              </div>
+            </aside>
+            <section class="clan-list-panel">
+              <div class="inventory-section-title"><span>ACTIVE CLANS</span><span id="clan-count">0</span></div>
+              <div id="clan-list" class="clan-list"></div>
+              <div class="inventory-section-title" style="margin-top:22px"><span>ONLINE SURVIVORS</span><span id="survivor-count">0</span></div>
+              <div id="survivor-list" class="survivor-list"></div>
+            </section>
+          </div>
+          <div class="inventory-footer"><span>ONE CLAN PER SURVIVOR · LEADER CONTROLS INVITES</span><span>C / ESC TO CLOSE</span></div>
+        </div>
+      </div>
+
+      <div id="map-overlay" class="map-overlay" aria-hidden="true">
+        <div class="map-window">
+          <div class="inventory-header">
+            <div>
+              <div class="panel-kicker">CHERNOZEM / TACTICAL OVERVIEW</div>
+              <h2>ZONE MAP</h2>
+            </div>
+            <button id="map-close" class="inventory-close" type="button">CLOSE <span>×</span></button>
+          </div>
+          <div class="map-canvas-wrap"><canvas id="full-map" width="900" height="900"></canvas></div>
+          <div class="map-legend">
+            <span><i class="legend-dot camp"></i>CAMP</span>
+            <span><i class="legend-dot town"></i>TOWNS</span>
+            <span><i class="legend-dot military"></i>MILITARY</span>
+            <span><i class="legend-dot loot"></i>LOOT</span>
+            <span><i class="legend-dot base"></i>SHELTER</span>
+            <span><i class="legend-dot resource"></i>RESOURCES</span>
+            <span><i class="legend-dot infected"></i>INFECTED</span>
+            <span><i class="legend-dot player"></i>YOU</span>
+            <span><i class="legend-dot clan"></i>CLAN</span>
+          </div>
+          <div class="inventory-footer"><span>MAP IS GENERATED FROM THE LIVE WORLD · LOOT SHOWN AS IT SPAWNS</span><span>M / ESC TO CLOSE</span></div>
+        </div>
+      </div>
+
+      <div id="craft-overlay" class="inventory-overlay craft-overlay" aria-hidden="true">
+        <div class="inventory-window craft-window">
+          <div class="inventory-header">
+            <div>
+              <div class="panel-kicker">FIELD WORKBENCH / FABRICATION</div>
+              <h2>CRAFTING</h2>
+            </div>
+            <button id="craft-close" class="inventory-close" type="button">CLOSE <span>×</span></button>
+          </div>
+          <div class="craft-resources" id="craft-resources"></div>
+          <div class="craft-content">
+            <div class="inventory-section-title"><span>AVAILABLE BLUEPRINTS</span><span id="craft-count">0</span></div>
+            <div id="craft-recipes" class="craft-recipes"></div>
+          </div>
+          <div class="inventory-footer"><span>HARVEST TIMBER, SCRAP, STONE, AND CLOTH OUT IN THE ZONE</span><span>B / ESC TO CLOSE</span></div>
+        </div>
+      </div>
+
+      <div id="chest-overlay" class="inventory-overlay chest-overlay" aria-hidden="true">
+        <div class="inventory-window chest-window">
+          <div class="inventory-header">
+            <div>
+              <div class="panel-kicker">SECURED SHELTER / STORAGE</div>
+              <h2 id="chest-title">STASH</h2>
+            </div>
+            <button id="chest-close" class="inventory-close" type="button">CLOSE <span>×</span></button>
+          </div>
+          <div class="chest-content">
+            <section class="chest-column">
+              <div class="inventory-section-title"><span>YOUR FIELD PACK</span><span id="chest-pack-count">0 / 24</span></div>
+              <div id="chest-pack-slots" class="inventory-grid chest-grid"></div>
+              <p class="chest-hint">CLICK A PACK ITEM TO STORE IT.</p>
+            </section>
+            <section class="chest-column">
+              <div class="inventory-section-title"><span id="chest-storage-label">STASH CONTENTS</span><span id="chest-storage-count">0 / 12</span></div>
+              <div id="chest-slots" class="inventory-grid chest-grid chest-storage-grid"></div>
+              <p class="chest-hint">CLICK A STASH ITEM TO TAKE IT.</p>
+            </section>
+          </div>
+          <div class="inventory-footer"><span id="chest-footer-text">ONLY THE OWNER OR THEIR CLAN MAY OPEN THIS STASH</span><span>E / ESC TO CLOSE</span></div>
+        </div>
+      </div>
+
+      <div id="clan-invite-popup" class="clan-invite-popup" aria-hidden="true">
+        <div class="panel-kicker">CLAN INVITATION</div>
+        <strong id="clan-invite-name">—</strong>
+        <p id="clan-invite-from">—</p>
+        <div class="clan-invite-actions">
+          <button id="clan-invite-accept" type="button">ACCEPT</button>
+          <button id="clan-invite-decline" type="button">DECLINE</button>
+        </div>
+      </div>
+
+      <div id="profile-overlay" class="profile-overlay" aria-hidden="true">
+        <div class="profile-window">
+          <div class="inventory-header">
+            <div>
+              <div class="panel-kicker">SURVIVOR NETWORK / IDENTITY</div>
+              <h2>PROFILE</h2>
+            </div>
+            <button id="profile-close" class="inventory-close" type="button">CLOSE <span>×</span></button>
+          </div>
+          <div class="profile-content">
+            <div class="profile-identity">
+              <img class="profile-reference" src="/character.png" alt="Survivor reference" />
+              <div id="profile-avatar-letter" class="profile-avatar-letter">S</div>
+              <div class="profile-name-block"><label for="profile-name-input">DISPLAY NAME</label><input id="profile-name-input" maxlength="18" spellcheck="false" /><button id="profile-save" type="button">SAVE IDENTITY</button></div>
+            </div>
+            <div class="profile-id-row"><span>SURVIVOR ID</span><strong id="profile-id">DZ-000000</strong></div>
+            <div class="profile-stat-grid"><div><span>STATUS</span><strong id="profile-status">HEALTHY</strong></div><div><span>PLAYTIME</span><strong id="profile-playtime">00:00:00</strong></div><div><span>LOOT SECURED</span><strong id="profile-looted">00</strong></div><div><span>REPUTATION</span><strong id="profile-reputation">UNKNOWN</strong></div></div>
+            <div class="profile-loadout"><div class="inventory-section-title">CURRENT LOADOUT</div><div id="profile-loadout-items" class="profile-loadout-items"></div></div>
+          </div>
+          <div class="inventory-footer"><span>YOUR IDENTITY IS SHARED WITH THE SESSION</span><span>P / ESC TO CLOSE</span></div>
+        </div>
+      </div>
+
+      <div id="damage-vignette" aria-hidden="true"></div>
+
+      <div id="death-overlay" class="death-overlay" aria-hidden="true">
+        <div class="death-panel">
+          <div class="panel-kicker">SURVIVAL SIGNAL LOST</div>
+          <h2>YOU DIED</h2>
+          <p id="death-summary">The zone took another survivor. Your field pack was scattered.</p>
+          <div class="death-actions">
+            <button id="respawn-base" type="button" disabled>RESPAWN AT BASE</button>
+            <button id="respawn-camp" type="button">RESPAWN AT CAMP</button>
+          </div>
+          <div class="death-footnote" id="death-footnote">NO CLAIMED SHELTER · CAMP RESPAWN AVAILABLE</div>
+        </div>
+      </div>
+
+      <div id="crosshair" aria-hidden="true"><span></span><span></span></div>
+
+      <div id="connection-error" class="toast" role="status"></div>
+    </main>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "dayza-chernov-exclusion-zone",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Zero-dependency Three.js multiplayer survival prototype with a 1000x1000 map, claimable shelters, crafting, harvestable resources, infected hordes, world loot, and clans.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  }
+}
